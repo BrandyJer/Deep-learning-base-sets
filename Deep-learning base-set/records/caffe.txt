@@ -1,0 +1,98 @@
+cudnn:
+./scp.sh /data/jiezhen/Software/cudnn-8.0-linux-x64-v6.0.tgz /root/Zip
+tar xvzf cudnn-8.0-linux-x64-v6.0.tgz
+# CUDNN解压路径：/root/Zip/cuda
+vi ~/.bashrc
+export CUDNN_HOME=/root/Zip/cuda
+export LD_LIBRARY_PATH=${CUDNN_HOME}/lib64:$LD_LIBRARY_PATH
+export CPLUS_INCLUDE_PATH=${CUDNN_HOME}/include:$CPLUS_INCLUDE_PATH
+==================================================================================
+yum -y install wget
+yum -y install gcc automake autoconf libtool make
+yum install gcc-c++
+==================================================================================
+tar -xzf openssl-1.0.2f.tar.gz
+cd openssl-1.0.2f
+mkdir /usr/local/openssl
+./config --prefix=/usr/local/openssl
+make
+make install
+
+ln -s /usr/local/openssl/bin/openssl /usr/bin/openssl
+cd /usr/local/openssl
+ldd /usr/local/openssl/bin/openssl
+openssl version
+====================================================================================
+sudo yum install git
+====================================================================================
+yum install protobuf-devel leveldb-devel snappy-devel opencv-devel boost-devel hdf5-devel
+yum install gflags-devel glog-devel lmdb-devel
+yum install atlas-devel 
+cd  /usr/lib64/atlas
+ln -sv libsatlas.so.3.10 libcblas.so
+ln -sv libsatlas.so.3.10 libatlas.so
+
+yum -y install cmake git pkgconfig libpng-devel libjpeg-turbo-devel jasper-devel openexr-devel libtiff-devel libwebp-devel  libdc1394-devel libv4l-devel gstreamer-plugins-base-devel  gtk2-devel tbb-devel eigen3-devel
+pip install numpy 
+yum install python-devel libgphoto2
+=====================================================================================>ffmpeg
+rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro
+rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm
+yum -y install ffmpeg ffmpeg-deve
+======================================================================================
+yum install boost-devel
+yum install zip unzip
+======================================================================================
+==================================未执行==nvcc  caffeconfig中2)取消对行 USE_NCCL := 1 的注释。这可以启用在多个 GPU 上运行Caffe 所需的 NCCL。
+====================================export LD_LIBRARY_PATH=/usr/local/cuda/lib
+====================================export PATH=$PATH:/usr/local/cuda/bin
+wget https://github.com/NVIDIA/nccl/archive/master.zip
+unzip master.zip
+cd nccl-master
+==================================以上==失败make install -j4
+======================================================================================
+git clone https://github.com/BVLC/caffe.git
+cd ./caffe/python/
+==================================>安装requirements中依赖库
+for req in $(cat requirements.txt); do pip install $req; done
+cd ..
+cp Makefile.config.example Makefile.config
+vim Makefile.config
+===================================>line5取消对行 USE_CUDNN := 1 的注释。这可以启用 cuDNN 加速。
+===================================>line55 BLAS_INCLUDE := /usr/include/atlas
+===================================>line56 BLAS_LIB := /usr/lib64/atlas
+===================================>line71-72  PYTHON_INCLUDE := /usr/include/python2.7 \
+                                                              /usr/lib64/python2.7/site-packages/numpy/core/include
+===================================>line86 PYTHON_LIB := /usr/lib64
+===================================>line94 WITH_PYTHON_LAYER := 1
+===================================>line97 INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/local/cuda-8.0/targets/x86_64-linux/include
+===================================>line98 LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib /usr/local/cuda-8.0/targets/x86_64-linux/lib
+===================================>主要问题还是没有把cuda的头文件、库的路径放置到caffe的Makefile.config中；line97-98
+===================================>line28 CUDA_DIR := /usr/local/cuda-8.0
+===================================>
+===================================>
+=========================================================================================
+vim /etc/profile
+PATH=/usr/local/cuda-8.0/bin:$PATH 
+export PATH 
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-8.0/lib64
+export LD_ LIBRARY_PATH 
+source /etc/profile
+
+cd /etc/ld.so.conf.d/
+vim cuda.conf==============>新建文件
+/usr/local/cuda-8.0/lib64
+/lib
+/usr/lib
+/usr/lib32
+================================
+ldconfig
+=========================================================================================
+make all -j1
+make test
+make runtest
+make pycaffe
+===================================>MINIST example
+sh data/mnist/get_mnist.sh
+sh examples/mnist/create_mnist.sh
+time sh examples/mnist/train_lenet.sh

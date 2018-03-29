@@ -1,0 +1,46 @@
+cudnn:
+./scp.sh /data/jiezhen/Software/cudnn-8.0-linux-x64-v6.0.tgz /root/Zip
+tar xvzf cudnn-8.0-linux-x64-v6.0.tgz
+# CUDNN解压路径：/root/Zip/cuda
+vi ~/.bashrc
+export CUDNN_HOME=/root/Zip/cuda
+export LD_LIBRARY_PATH=${CUDNN_HOME}/lib64:$LD_LIBRARY_PATH
+export CPLUS_INCLUDE_PATH=${CUDNN_HOME}/include:$CPLUS_INCLUDE_PATH
+================================================================
+pip install tensorflow-gpu
+#tensorflow1.6.0需要cudnn.9.0
+pip uninstall tensorflow
+================================================================
+源安装1.2.1版本
+================================================================
+tar -xzf openssl-1.0.2f.tar.gz
+cd openssl-1.0.2f
+mkdir /usr/local/openssl
+./config --prefix=/usr/local/openssl
+make
+make install
+
+ln -s /usr/local/openssl/bin/openssl /usr/bin/openssl
+cd /usr/local/openssl
+ldd /usr/local/openssl/bin/openssl
+openssl version
+================================================================
+jupyter notebook --generate-config
+
+cd ~/.jupyter
+openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout notebook_cert.key -out notebook_cert.pem
+python -c "import IPython;print(IPython.lib.passwd())"
+5660991
+vim ~/.jupyter/jupyter_notebook_config.py
+//////////////////////////////////////////////////////////////////////////////
+c = get_config()
+ 
+c.NotebookApp.certfile = u'/root/.jupyter/notebook_cert.pem'
+c.NotebookApp.keyfile = u'/root/.jupyter/notebook_cert.key'
+ 
+c.NotebookApp.password = u'sha1:b9fc7f820553:99323ef9739756ad55d1ee7b3574cb4753463948'
+ 
+c.NotebookApp.ip = '*'
+c.NotebookApp.port = 8080
+c.NotebookApp.open_browser = False
+//////////////////////////////////////////////////////////////////////////////
